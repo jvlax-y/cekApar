@@ -1,32 +1,119 @@
-import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
+import React, { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import Navbar from "@/components/Navbar";
+import { supabase } from "../integrations/supabase/client";  // ✅ path sudah sesuai
+import PersonnelForm from "@/components/PersonnelForm";
+import PersonnelList from "@/components/PersonnelList";
+import SatpamSchedule from "@/components/SatpamSchedule";
+import AparForm from "@/components/AparForm";
+import AparList from "@/components/AparList";
+import toast from 'react-hot-toast';
+
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const AdminDashboard = () => {
-  const { user, loading } = useAuth();
+  const { session, loading } = useAuth();
+  const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [locationListRefreshKey, setLocationListRefreshKey] = useState(0);
+  const [personnelListRefreshKey, setPersonnelListRefreshKey] = useState(0); // New state for personnel list refresh
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">Loading...</div>;
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!loading && session) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        if (error) {
+          if (error.code === 'PGRST204') { // No rows found
+            console.warn("No profile found for user, redirecting from Admin Dashboard.");
+            toast.error("Akses ditolak. Profil tidak ditemukan atau Anda bukan admin.");
+          } else {
+            console.error("Error fetching profile role:", error);
+            toast.error("Gagal memuat peran pengguna.");
+          }
+          navigate('/'); // Redirect in case of error or no profile
+        } else if (data?.role === 'admin') {
+          setIsAdmin(true);
+        } else {
+          toast.error("Akses ditolak. Anda bukan admin.");
+          navigate('/'); // Redirect if not admin
+        }
+        setProfileLoading(false);
+      } else if (!loading && !session) {
+        navigate('/login'); // Redirect to login if not authenticated
+      }
+    };
+
+    checkAdminStatus();
+  }, [session, loading, navigate]);
+
+  const handleLocationCreated = () => {
+    setLocationListRefreshKey(prevKey => prevKey + 1); // Increment key to trigger refresh
+  };
+
+  const handlePersonnelAdded = () => {
+    setPersonnelListRefreshKey(prevKey => prevKey + 1); // Increment key to trigger refresh
+  };
+
+  const [aparListRefreshKey, setAparListRefreshKey] = useState(0); // New state for apar list refresh
+
+  const handleAparAdded = () => {
+    setAparListRefreshKey(prevKey => prevKey + 1); // Increment key to trigger refresh
+  };
+
+
+  if (loading || profileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <p className="text-xl text-gray-600 dark:text-gray-400">Memuat dashboard admin...</p>
+      </div>
+    );
   }
 
-  if (!user || user.role !== 'admin') {
-    return <Navigate to="/login" replace />;
+  if (!isAdmin) {
+    return null; // Will be redirected by useEffect
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <Navbar />
-      <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
-        <p className="text-gray-700 dark:text-gray-300">Selamat datang, {user.first_name} {user.last_name}!</p>
-        <div className="mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Fitur Admin akan datang di sini...</h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Ini adalah placeholder untuk tab Kelola Personel, Kelola Lokasi, dan Penjadwalan Satpam.
-          </p>
-        </div>
-      </div>
+    <div className="container mx-auto p-4">
+      <Card className="max-w-5xl mx-auto mt-8"> {/* Lebarkan Card untuk menampung 3 tab */}
+        <CardHeader>
+          <CardTitle className="text-center">Dashboard Admin</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="personnel" className="w-full">
+            <TabsList className="grid w-full grid-cols-3"> 
+              <TabsTrigger value="personnel">Kelola Personel</TabsTrigger>
+              <TabsTrigger value="schedule">Penjadwalan Satpam</TabsTrigger>
+              <TabsTrigger value="apar">Kelola Cek Apar</TabsTrigger> 
+            </TabsList>
+
+            <TabsContent value="personnel" className="mt-4">
+              <h3 className="text-xl font-semibold mb-4">Tambah Personel Satpam Baru</h3>
+              <PersonnelForm onPersonnelAdded={handlePersonnelAdded} />
+              <PersonnelList isAdmin={isAdmin} refreshKey={personnelListRefreshKey} />
+            </TabsContent>
+
+            <TabsContent value="schedule" className="mt-4">
+              <h3 className="text-xl font-semibold mb-4">Penjadwalan Satpam</h3>
+              <SatpamSchedule />
+            </TabsContent>
+
+            <TabsContent value="apar" className="mt-4">
+              <h3 className="text-xl font-semibold mb-4">Buat Lokasi Cek Apar Baru</h3>
+              <AparForm onAparAdded={handleAparAdded} />
+              <AparList refreshKey={aparListRefreshKey} />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };

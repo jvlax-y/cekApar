@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { MadeWithDyad } from "@/components/made-with-dyad";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -24,9 +23,7 @@ const Index = () => {
             navigate('/supervisor/dashboard');
             break;
           default:
-            // Fallback for unknown roles or if no specific dashboard is defined
             console.warn('Unknown user role or no specific dashboard:', user.role);
-            // Optionally, show a generic welcome or redirect to a default authenticated page
             break;
         }
       }
@@ -51,7 +48,6 @@ const Index = () => {
           Redirecting you to the appropriate dashboard...
         </p>
       </div>
-      <MadeWithDyad />
     </div>
   );
 };
