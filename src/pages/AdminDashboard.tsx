@@ -107,9 +107,7 @@ const AdminDashboard = () => {
             </TabsContent>
 
             <TabsContent value="apar" className="mt-4">
-              <h3 className="text-xl font-semibold mb-4">Buat Lokasi Cek Apar Baru</h3>
-              <AparForm onAparAdded={handleAparAdded} />
-              <AparList refreshKey={aparListRefreshKey} />
+              <AparForm />
             </TabsContent>
           </Tabs>
         </CardContent>

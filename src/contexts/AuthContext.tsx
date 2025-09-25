@@ -24,67 +24,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  console.log("AuthProvider mounted...");
+    console.log("AuthProvider mounted...");
 
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    async (event, currentSession) => {
-      console.log("Auth event:", event, currentSession);
-      setSession(currentSession);
-
-      if (currentSession) {
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("first_name, last_name, role")
-          .eq("id", currentSession.user.id)
-          .single();
-
-        if (profileError) {
-          console.error("Error fetching profile:", profileError);
-          setUser(currentSession.user as (User & UserProfile));
-        } else {
-          console.log("Profile data:", profileData);
-          setUser({ ...currentSession.user, ...profileData } as User & UserProfile);
-        }
+    // Get initial session
+    const getInitialSession = async () => {
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      console.log("Initial session:", initialSession);
+      
+      if (initialSession) {
+        await fetchUserProfile(initialSession);
       } else {
-        console.log("No session, setUser(null)");
-        setUser(null);
+        setLoading(false);
       }
-      setLoading(false);
-    }
-  );
+    };
 
-  // Initial session check
-  supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
-    console.log("Initial session:", initialSession, error);
-    setSession(initialSession);
-    if (initialSession) {
-      supabase
+    // Fetch user profile
+    const fetchUserProfile = async (currentSession: Session) => {
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("first_name, last_name, role")
-        .eq("id", initialSession.user.id)
-        .single()
-        .then(({ data: profileData, error: profileError }) => {
-          if (profileError) {
-            console.error("Error fetching initial profile:", profileError);
-            setUser(initialSession.user as (User & UserProfile));
-          } else {
-            console.log("Initial profile data:", profileData);
-            setUser({ ...initialSession.user, ...profileData } as User & UserProfile);
-          }
-        });
-    }
-    setLoading(false);
-  });
+        .eq("id", currentSession.user.id)
+        .single();
 
-  return () => subscription.unsubscribe();
-}, []);
+      setSession(currentSession);
 
+      if (profileError) {
+        console.error("Error fetching profile:", profileError);
+        setUser(currentSession.user as (User & UserProfile));
+      } else {
+        console.log("Profile data:", profileData);
+        setUser({ ...currentSession.user, ...profileData } as User & UserProfile);
+      }
+      setLoading(false);
+    };
 
+    // Auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        console.log("Auth event:", event, currentSession);
+        
+        if (currentSession) {
+          await fetchUserProfile(currentSession);
+        } else {
+          console.log("No session, clearing user");
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+        }
+      }
+    );
+
+    // Get initial session
+    getInitialSession();
+
+    // Cleanup function
+    return () => {
+      console.log("AuthProvider cleanup");
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const signOut = async () => {
+    setLoading(true);
     await supabase.auth.signOut();
     setSession(null);
     setUser(null);
+    setLoading(false);
   };
 
   return (
@@ -94,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
