@@ -4,10 +4,8 @@ import tailwindcssAnimate from "tailwindcss-animate";
 export default {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    "./index.html",
+    "./src/**/*.{ts,tsx,js,jsx}",  // ✅ Cukup ini aja, udah nyangkup semua
   ],
   prefix: "",
   theme: {
@@ -26,11 +24,11 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(217, 91%, 35%)", // Navy blue dari logo
+          DEFAULT: "hsl(217, 91%, 35%)",
           foreground: "hsl(0, 0%, 100%)",
         },
         secondary: {
-          DEFAULT: "hsl(217, 91%, 60%)", // Sky blue dari logo
+          DEFAULT: "hsl(217, 91%, 60%)",
           foreground: "hsl(0, 0%, 100%)",
         },
         destructive: {
@@ -42,7 +40,7 @@ export default {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(217, 91%, 60%)", // Blue accent
+          DEFAULT: "hsl(217, 91%, 60%)",
           foreground: "hsl(0, 0%, 100%)",
         },
         popover: {
@@ -54,7 +52,7 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         sidebar: {
-          DEFAULT: "hsl(217, 91%, 35%)", // Navy untuk sidebar
+          DEFAULT: "hsl(217, 91%, 35%)",
           foreground: "hsl(0, 0%, 100%)",
           primary: "hsl(217, 91%, 60%)",
           "primary-foreground": "hsl(0, 0%, 100%)",
@@ -64,7 +62,25 @@ export default {
           ring: "hsl(217, 91%, 60%)",
         },
       },
-      // ... sisanya tetap sama
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
     },
   },
   plugins: [tailwindcssAnimate],
