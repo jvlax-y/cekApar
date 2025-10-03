@@ -11,30 +11,36 @@ import SatpamDashboard from "./pages/SatpamDashboard";
 import SupervisorDashboard from "./pages/SupervisorDashboard";
 import { AuthProvider } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar";
+import { SessionProvider } from "./integrations/supabase/SessionContext";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Navbar /> {/* Navbar will only render if user is logged in */}
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/satpam/dashboard" element={<SatpamDashboard />} />
-            <Route path="/supervisor/dashboard" element={<SupervisorDashboard />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  console.log("App rendering...");
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <SessionProvider> {/* ✅ wrap everything with SessionProvider */}
+          <BrowserRouter>
+            <AuthProvider>
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/satpam/dashboard" element={<SatpamDashboard />} />
+                <Route path="/supervisor/dashboard" element={<SupervisorDashboard />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </SessionProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

@@ -43,10 +43,7 @@ const Register = () => {
           localization={{
             variables: {
               sign_up: {
-                // Menghapus properti link_text sepenuhnya untuk menyembunyikan semua tautan
-                // link_text: {
-                //   no_account: null,
-                // },
+                
               },
             },
           }}

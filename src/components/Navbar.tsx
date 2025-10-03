@@ -8,8 +8,17 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
 
   const handleLogout = async () => {
+  try {
+    console.log('Logout clicked'); // Debug log
     await signOut();
-  };
+    console.log('SignOut completed'); // Debug log
+    
+    // Force redirect kalo signOut gak redirect
+    window.location.href = '/login';
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+};
 
   if (!user) {
     return null;
