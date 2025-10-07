@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import PersonnelForm from "@/components/PersonnelForm";
-import PersonnelList from "@/components/PersonnelList";
+import UserManagement from "@/components/UserManagement";
 import SatpamSchedule from "@/components/SatpamSchedule";
 import AparForm from "@/components/AparForm";
 import toast from 'react-hot-toast';
@@ -14,9 +13,6 @@ const AdminDashboard = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [locationListRefreshKey, setLocationListRefreshKey] = useState(0);
-  const [personnelListRefreshKey, setPersonnelListRefreshKey] = useState(0);
-  const [aparListRefreshKey, setAparListRefreshKey] = useState(0);
 
   useEffect(() => {
     if (!loading) {
@@ -33,18 +29,6 @@ const AdminDashboard = () => {
       }
     }
   }, [user, loading, navigate]);
-
-  const handleLocationCreated = () => {
-    setLocationListRefreshKey(prevKey => prevKey + 1);
-  };
-
-  const handlePersonnelAdded = () => {
-    setPersonnelListRefreshKey(prevKey => prevKey + 1);
-  };
-
-  const handleAparAdded = () => {
-    setAparListRefreshKey(prevKey => prevKey + 1);
-  };
 
   if (loading) {
     return (
@@ -63,26 +47,23 @@ const AdminDashboard = () => {
       <div className="container mx-auto px-4 max-w-6xl">
         <h1 className="text-3xl font-bold text-center mb-8">Dashboard Admin</h1>
         
-        <Tabs defaultValue="personnel" className="w-full">
-          <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 gap-2 mb-32 md:mb-8">            
-            <TabsTrigger value="personnel">Kelola Personel</TabsTrigger>
-            <TabsTrigger value="schedule">Penjadwalan Satpam</TabsTrigger>
+        <Tabs defaultValue="users" className="w-full">
+          <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 gap-2 mb-8">
+            <TabsTrigger value="users">Kelola User & Role</TabsTrigger>
+            <TabsTrigger value="schedule">Penjadwalan Tugas</TabsTrigger>
             <TabsTrigger value="apar">Kelola Cek Apar</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="personnel" className="space-y-6">
+          <TabsContent value="users" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Tambah Personel Satpam Baru</CardTitle>
+                <CardTitle>Manajemen User & Role</CardTitle>
               </CardHeader>
               <CardContent>
-                <PersonnelForm onPersonnelAdded={handlePersonnelAdded} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <PersonnelList isAdmin={isAdmin} refreshKey={personnelListRefreshKey} />
+                <p className="text-sm text-gray-600 mb-4">
+                  User baru akan tampil di sini dan admin bisa mengubah role mereka ^^.
+                </p>
+                <UserManagement />
               </CardContent>
             </Card>
           </TabsContent>
@@ -90,9 +71,12 @@ const AdminDashboard = () => {
           <TabsContent value="schedule" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Penjadwalan Satpam</CardTitle>
+                <CardTitle>Penjadwalan Tugas Satpam</CardTitle>
               </CardHeader>
               <CardContent>
+                <p className="text-sm text-gray-600 mb-4">
+                  Assign jadwal pengecekan lokasi untuk setiap satpam.
+                </p>
                 <SatpamSchedule />
               </CardContent>
             </Card>

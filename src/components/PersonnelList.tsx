@@ -38,7 +38,7 @@ const PersonnelList: React.FC<PersonnelListProps> = ({ isAdmin, refreshKey }) =>
       // ✅ Direct query ke database, gak pake Edge Function
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, id_number, role, email')
+        .select('id, first_name, last_name, role, email')
         .order('first_name', { ascending: true });
 
       if (error) throw error;
@@ -127,7 +127,6 @@ const PersonnelList: React.FC<PersonnelListProps> = ({ isAdmin, refreshKey }) =>
             <TableRow>
               <TableHead>Nama Depan</TableHead>
               <TableHead>Nama Belakang</TableHead>
-              <TableHead>Nomor ID</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Peran</TableHead>
               {isAdmin && <TableHead className="text-right">Aksi</TableHead>}
@@ -138,7 +137,6 @@ const PersonnelList: React.FC<PersonnelListProps> = ({ isAdmin, refreshKey }) =>
               <TableRow key={p.id}>
                 <TableCell className="font-medium">{p.first_name}</TableCell>
                 <TableCell>{p.last_name}</TableCell>
-                <TableCell>{p.id_number || '-'}</TableCell>
                 <TableCell>{p.email || '-'}</TableCell>
                 <TableCell>{p.role || 'Tidak Diketahui'}</TableCell>
                 {isAdmin && (

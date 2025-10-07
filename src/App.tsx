@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
+import Register from "./pages/Register";
 import SatpamDashboard from "./pages/SatpamDashboard";
 import SupervisorDashboard from "./pages/SupervisorDashboard";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -23,13 +24,14 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <SessionProvider> {/* ✅ wrap everything with SessionProvider */}
+        <SessionProvider> 
           <BrowserRouter>
             <AuthProvider>
               <Navbar />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/satpam/dashboard" element={<SatpamDashboard />} />
                 <Route path="/supervisor/dashboard" element={<SupervisorDashboard />} />
